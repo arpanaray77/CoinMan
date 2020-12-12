@@ -34,6 +34,8 @@ public class CoinMan extends ApplicationAdapter{
     Rectangle manRectangle;
     int score=0;
     BitmapFont font;
+    int gameState=0;
+    Texture dizzy;
 
 
 	@Override
@@ -50,11 +52,12 @@ public class CoinMan extends ApplicationAdapter{
         manY=Gdx.graphics.getHeight()/2;
         coin=new Texture("coin128.png");
         bomb=new Texture("bomb128.png");
+        dizzy=new Texture("dizzy.png");
         random=new Random();
 
         font=new BitmapFont();
         font.setColor(Color.WHITE);
-        font.getData().setScale(10);
+        font.getData().setScale(2);
 	}
 
 	public void makeCoin() {
@@ -77,68 +80,102 @@ public class CoinMan extends ApplicationAdapter{
 	public void render () {
      batch.begin();
      batch.draw(background,0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
-     //BOMBS
-     if(bombCount<500)
+		//Game is Live
+     if(gameState==1)
+	 {
+			 //BOMBS
+			 if(bombCount<500)
+			 {
+				 bombCount++;
+			 }
+			 else
+			 {
+				 bombCount=0;
+				 makeBomb();
+			 }
+			 bombsRectangle.clear();
+			 for (int i=0;i<bombXs.size();i++)
+			 {
+				 batch.draw(bomb,bombXs.get(i),bombYs.get(i));
+				 bombXs.set(i,bombXs.get(i)-8);
+				 bombsRectangle.add(new Rectangle(bombXs.get(i),bombYs.get(i),bomb.getWidth(),bomb.getHeight()));
+			 }
+
+			 //COINS
+			 if(coinCount<100)
+			 {
+				 coinCount++;
+			 }
+			 else
+			 {
+				 coinCount=0;
+				 makeCoin();
+			 }
+			 coinsRectangle.clear();
+			 for (int i=0;i<coinXs.size();i++)
+			 {
+				 batch.draw(coin,coinXs.get(i),coinYs.get(i));
+				 coinXs.set(i,coinXs.get(i)-4);
+				 coinsRectangle.add(new Rectangle(coinXs.get(i),coinYs.get(i),coin.getWidth(),coin.getHeight()));
+			 }
+
+			 if(Gdx.input.getPressure()>0) {
+				 velocity-=5;
+			 }
+			 if(pause<8)
+			 {
+				 pause++;
+			 }
+			 else
+			 {
+				 pause=0;
+				 if(manState<3)
+					 manState++;
+				 else
+					 manState=0;
+			 }
+
+			 velocity+=gravity;
+			 manY-=velocity;
+			 if(manY<=320 || manY>=Gdx.graphics.getHeight()-200)
+			 {
+				 manY=320;
+			 }
+		 }
+	 //waiting to start
+     else if(gameState==0)
+	 {
+	 	if(Gdx.input.justTouched())
+	 		gameState=1;
+	 }
+	 //game is Over
+     else if(gameState==2)
+	 {
+	 	if(Gdx.input.justTouched())
 		{
-			bombCount++;
-		}
-		else
-		{
+			gameState=1;
+			manY=Gdx.graphics.getHeight()/2;
+			score=0;
+			velocity=0;
+			coinXs.clear();
+			coinYs.clear();
+			coinsRectangle.clear();
+			coinCount=0;
+			bombXs.clear();
+			bombYs.clear();
+			bombsRectangle.clear();
 			bombCount=0;
-			makeBomb();
 		}
-		bombsRectangle.clear();
-     for (int i=0;i<bombXs.size();i++)
-		{
-			batch.draw(bomb,bombXs.get(i),bombYs.get(i));
-			bombXs.set(i,bombXs.get(i)-8);
-			bombsRectangle.add(new Rectangle(bombXs.get(i),bombYs.get(i),bomb.getWidth(),bomb.getHeight()));
-		}
-
-     //COINS
-	if(coinCount<100)
+	 }
+     //checking game over condition
+     if(gameState==2)
 	 {
-	 	coinCount++;
+	 	batch.draw(dizzy,Gdx.graphics.getWidth() / 2 - man[manState].getWidth() / 2, manY);
 	 }
-     else
-	 {
-	 	coinCount=0;
-	 	makeCoin();
+     else {
+		 batch.draw(man[manState], Gdx.graphics.getWidth() / 2 - man[manState].getWidth() / 2, manY);
 	 }
-     coinsRectangle.clear();
-     for (int i=0;i<coinXs.size();i++)
-	 {
-	 	batch.draw(coin,coinXs.get(i),coinYs.get(i));
-	 	coinXs.set(i,coinXs.get(i)-4);
-	 	coinsRectangle.add(new Rectangle(coinXs.get(i),coinYs.get(i),coin.getWidth(),coin.getHeight()));
-	 }
-
-     if(Gdx.input.getPressure()>0) {
-     	velocity-=5;
-	 }
-     if(pause<8)
-	  {
-         pause++;
-     }
-     else
-	 {
-	 	pause=0;
-		 if(manState<3)
-			 manState++;
-		 else
-			 manState=0;
-	 }
-
-     velocity+=gravity;
-     manY-=velocity;
-    Gdx.app.log("ghdvajhfasj","manY="+manY+" "+velocity+ " "+gravity+" "+Gdx.graphics.getHeight());
-
-     if(manY<=320 || manY>=Gdx.graphics.getHeight()-200)
-	 {
-	 	manY=320;
-	 }
-     batch.draw(man[manState],Gdx.graphics.getWidth()/2-man[manState].getWidth()/2,manY);
-     manRectangle=new Rectangle(Gdx.graphics.getWidth()/2-man[manState].getWidth()/2,manY,man[manState].getWidth(),man[manState].getHeight());
+	 manRectangle=new Rectangle(Gdx.graphics.getWidth()/2-man[manState].getWidth()/2,manY,man[manState].getWidth(),man[manState].getHeight());
 
      for(int i=0;i<coinsRectangle.size();i++)
 	{
@@ -155,7 +192,7 @@ public class CoinMan extends ApplicationAdapter{
 		{
 			if(Intersector.overlaps(manRectangle,bombsRectangle.get(i)))
 			{
-				Gdx.app.log("Bomb!","Collision");
+				gameState=2;
 			}
 		}
      font.draw(batch,String.valueOf(score),100,200);
