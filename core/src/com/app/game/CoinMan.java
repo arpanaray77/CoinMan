@@ -9,8 +9,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 import java.util.ArrayList;
 import java.util.Random;
-
-public class CoinMan extends ApplicationAdapter {
+public class CoinMan extends ApplicationAdapter{
 	SpriteBatch batch;
 	Texture background;
 	Texture[] man;
@@ -106,8 +105,8 @@ public class CoinMan extends ApplicationAdapter {
 	 	coinsRectangle.add(new Rectangle(coinXs.get(i),coinYs.get(i),coin.getWidth(),coin.getHeight()));
 	 }
 
-     if(Gdx.input.justTouched()) {
-     	velocity-=10;
+     if(Gdx.input.getPressure()>0 && Gdx.input.getPressure()<0.5) {
+     	velocity-=5;
 	 }
      if(pause<8)
 	  {
@@ -124,8 +123,9 @@ public class CoinMan extends ApplicationAdapter {
 
      velocity+=gravity;
      manY-=velocity;
+    Gdx.app.log("ghdvajhfasj","manY="+manY+" "+velocity+ " "+gravity+" "+Gdx.graphics.getHeight());
 
-     if(manY<=320)
+     if(manY<=320 || manY>=Gdx.graphics.getHeight()-200)
 	 {
 	 	manY=320;
 	 }
@@ -139,7 +139,7 @@ public class CoinMan extends ApplicationAdapter {
 			Gdx.app.log("Coin!","Collision");
 		}
 	}
-		for(int i=0;i<bombsRectangle.size();i++)
+     for(int i=0;i<bombsRectangle.size();i++)
 		{
 			if(Intersector.overlaps(manRectangle,bombsRectangle.get(i)))
 			{
