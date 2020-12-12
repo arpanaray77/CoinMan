@@ -2,7 +2,9 @@ package com.app.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
@@ -30,6 +32,8 @@ public class CoinMan extends ApplicationAdapter{
 	int bombCount;
     Random random;
     Rectangle manRectangle;
+    int score=0;
+    BitmapFont font;
 
 
 	@Override
@@ -47,6 +51,10 @@ public class CoinMan extends ApplicationAdapter{
         coin=new Texture("coin128.png");
         bomb=new Texture("bomb128.png");
         random=new Random();
+
+        font=new BitmapFont();
+        font.setColor(Color.WHITE);
+        font.getData().setScale(10);
 	}
 
 	public void makeCoin() {
@@ -105,7 +113,7 @@ public class CoinMan extends ApplicationAdapter{
 	 	coinsRectangle.add(new Rectangle(coinXs.get(i),coinYs.get(i),coin.getWidth(),coin.getHeight()));
 	 }
 
-     if(Gdx.input.getPressure()>0 && Gdx.input.getPressure()<0.5) {
+     if(Gdx.input.getPressure()>0) {
      	velocity-=5;
 	 }
      if(pause<8)
@@ -136,7 +144,11 @@ public class CoinMan extends ApplicationAdapter{
 	{
 		if(Intersector.overlaps(manRectangle,coinsRectangle.get(i)))
 		{
-			Gdx.app.log("Coin!","Collision");
+			score++;
+			coinsRectangle.remove(i);
+			coinXs.remove(i);
+			coinYs.remove(i);
+			break;
 		}
 	}
      for(int i=0;i<bombsRectangle.size();i++)
@@ -146,6 +158,7 @@ public class CoinMan extends ApplicationAdapter{
 				Gdx.app.log("Bomb!","Collision");
 			}
 		}
+     font.draw(batch,String.valueOf(score),100,200);
      batch.end();
 	}
 	
