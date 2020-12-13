@@ -171,6 +171,10 @@ public class CoinMan extends ApplicationAdapter{
      if(gameState==2)
 	 {
 	 	batch.draw(dizzy,Gdx.graphics.getWidth() / 2 - man[manState].getWidth() / 2, manY);
+	 	BitmapFont text=new BitmapFont();
+	 	text.setColor(Color.BLACK);
+	 	text.getData().setScale(3);
+	 	text.draw(batch,"Game Over!! Tap to continue",50, 300);
 	 }
      else {
 		 batch.draw(man[manState], Gdx.graphics.getWidth() / 2 - man[manState].getWidth() / 2, manY);
